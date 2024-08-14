@@ -1,34 +1,59 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react'
+import { Outlet, useLoaderData, useNavigate } from 'react-router-dom'
+import Header from './components/Header';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { AxiosReq } from './Axios.Provider';
+const App = () => {
+  const data = useLoaderData()
+  // const navigate = useNavigate()
+  // const [user,setUser] = useState({
+  //   name:'',
+  //   email:'',
+  //   role:''
+  // })
 
-function App() {
-  const [count, setCount] = useState(0)
+  // const [loading,setLoading] = useState(true)
+  // const fetchUser =async(token:string)=>{
+  //       try {
+  //         const res = await AxiosReq.get("/profile",{
+  //           headers:{
+  //             'Authorization':'Bearer '+token
+  //           }
+  //         })
+  //         const data = await res.data;
+  //             setUser({
+  //               ...data
+  //             })
+
+            
+
+  //       } catch (error:any) {
+  //           toast.error(error.message)
+  //           navigate("/login")
+  //       }finally{
+  //         setLoading(false)
+  //       }
+
+
+  // }
+
+  // // useEffect(()=>{
+
+  // // },[])
+
+  // if(loading){
+  //   return <div>loading...</div>
+  // }
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <ToastContainer/>
+      <Header user={{}} />
+          <Outlet/>
+
+      {/* {JSON.stringify(data)} */}
+    </div>
   )
 }
 

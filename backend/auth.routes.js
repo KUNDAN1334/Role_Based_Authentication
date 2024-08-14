@@ -10,77 +10,74 @@ router.route("/register")
 .post(async(req,res)=>{
     const {name,email,role,password}=req.body;
 
-if(!name || !email || !role || !password){
-    res.status(httpStatus.BAD_REQUEST).send({
+    if(!name || !email || !role || !password){
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message:"All fields are required"
+        });
+    }
 
-        message:"All fields are required"
-    })
-}
+    //check if role is present or not
+    if(!Object.keys(Roles).includes(role.toLowerCase())){
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message:'Please Choose Valid role'
+        });
+    }
 
-//check if role is present or not
-if(!Object.keys(Roles).includes(role.toLowerCase())){
-    return  res.status(httpStatus.BAD_REQUEST).send({
-         message:'Please Choose Valid role'
-     }) 
- }
+    const chk_user = await UserModel.findOne({email:email.toLowerCase()});
+    if(chk_user){
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message:"User already exists"
+        });
+    }
 
-const chk_user= await UserModel.findOne({email:email.toLowerCase()});
-if(chk_user){
-    res.status(httpStatus.BAD_REQUEST).send({
-        message:"User already exists"
-    })
-}
+    //data save
+    await UserModel.create({
+        name,
+        email:email.toLowerCase(),
+        role:Roles[role],
+        password
+    });
 
-
-//data save
-await UserModel.create({
-    name,
-    email:email.toLowerCase(),
-    role:Roles[role],
-    password
-})
-
-
-    res.send({
+    return res.status(httpStatus.CREATED).send({
         msg: "Register Successful"
     });
-})
+});
+
 
 router.route("/login")
 .post(async(req,res)=>{
     const {email,password}=req.body;
 
-if(!email || !password){
-    res.status(httpStatus.BAD_REQUEST).send({
+    if(!email || !password){
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message:"All fields are required"
+        });
+    }
 
-        message:"All fields are required"
-    })
-}
+    const chk_user = await UserModel.findOne({email:email.toLowerCase()});
+    if(!chk_user){
+        return res.status(httpStatus.NOT_FOUND).send({
+            message:"Account not found"
+        });
+    }
 
-const chk_user= await UserModel.findOne({email:email.toLowerCase()});
-if(!chk_user){
-    res.status(httpStatus.BAD_REQUEST).send({
-        message:"Account not exist"
-    })
-}
+    //Password match karke dekhenge
+    const isMatch = await chk_user.matchPassword(password);
+    if(!isMatch){
+        return res.status(httpStatus.UNAUTHORIZED).send({
+            message:"Invalid credentials"
+        });
+    }
 
-//Password match karke dekhenge
-const isMatch=await chk_user.matchPassword(password);
-if(!isMatch){
-    res.status(httpStatus.BAD_REQUEST).send({
-        message:"Invalid credentials"
-    })
-}
+    // token save
+    const token = JWTService.generateToken(chk_user._id, chk_user.role);
 
-        // token save
-        const token =JWTService.generateToken(chk_user._id,chk_user.role)
+    return res.send({
+        msg:"Login Successfully",
+        token
+    });
+});
 
-
-        return  res.send({
-            msg:"Login Successfully",
-            token
-        })
-    })
 
     router.route("/profile")
 .get(AuthValidation,async (req,res)=>{
